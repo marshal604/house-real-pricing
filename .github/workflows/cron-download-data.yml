@@ -1,0 +1,26 @@
+name: Scheduled Workflow
+
+on:
+  schedule:
+    - cron: '0 0 2,12,22 * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_KEY }}
+      - name: Install
+        run: yarn
+      - name: Run download data script
+        env:
+          GOOGLE_MAP_API_KEY: ${{ secrets.GOOGLE_MAP_API_KEY }}
+        run: yarn script:download-data
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Automated commit for updating house-pricing-list.json from GitHub Actions" || exit 0
+          git push
